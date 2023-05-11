@@ -1,0 +1,9 @@
+syntax = "proto3";
+package mjcarroll2.foo;
+
+import "mjcarroll/foo/depends.proto";
+
+message Bytes
+{
+  mjcarroll.foo.Depends data = 1;
+}

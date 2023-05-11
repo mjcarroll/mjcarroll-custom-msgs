@@ -1,0 +1,10 @@
+syntax = "proto3";
+package mjcarroll.foo;
+
+import "gz/msgs/header.proto";
+
+/// A message that depends on gz.msgs
+message Depends
+{
+  gz.msgs.Header header = 1;
+}
