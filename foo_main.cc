@@ -1,33 +1,31 @@
-#include <gz/msgs/Factory.hh>
+#include <dlfcn.h>
 
-#include <google/protobuf/text_format.h>
+#include <iostream>
+#include <string>
+
+void call_foo(const std::string &_libraryName)
+{
+  void *handle = dlopen(_libraryName.c_str(), RTLD_LAZY);
+  if (!handle) {
+    std::cerr << "Cannot open library: " << dlerror() << std::endl;
+    return;
+  }
+
+  typedef void (*foo_t)();
+  foo_t foo = (foo_t) dlsym(handle, "foo");
+  const char *dlsym_error = dlerror();
+  if (dlsym_error) {
+    std::cerr << "Cannot load symbol 'hello': " << dlsym_error << std::endl;
+    dlclose(handle);
+    return;
+  }
+  foo();
+  dlclose(handle);
+}
+
 
 int main(int argc, char** argv)
 {
-  if (argc == 1)
-  {
-    std::vector<std::string> known_types;
-    gz::msgs::Factory::Types(known_types);
-    std::cout << "Known types: " << std::endl;
-    for (const auto &t: known_types)
-    {
-        std::cout << t << std::endl;
-    }
-  }
-  else
-  {
-    gz::msgs::Factory::MessagePtr msg = gz::msgs::Factory::New(argv[1]);
-    if (msg)
-    {
-      auto descriptor = msg->GetDescriptor();
-      auto fileDescriptor = descriptor->file();
-      std::cout << "Name: " << descriptor->full_name() << std::endl;
-      std::cout << "File: " << fileDescriptor->name() << std::endl << std::endl;
-      std::cout << descriptor->DebugString() << std::endl;
-    }
-    else
-    {
-      std::cout << "Couldn't find msg: " << argv[1] << std::endl;;
-    }
-  }
+  call_foo("./lib1/liblib1.so");
+  call_foo("./lib2/liblib2.so");
 }
